@@ -1,0 +1,426 @@
+@import "tailwindcss";
+
+:root {
+  --paper: #eeece5;
+  --surface: #f8f7f3;
+  --ink: #1b2430;
+  --ink-soft: #46505d;
+  --ink-muted: #6f7680;
+  --line: #d8d2c4;
+  --line-strong: #c2bba9;
+  /* Signal orange: brand mark, dots, borders. Text/button fill uses the deeper shade for AA contrast. */
+  --sigap: #e8622c;
+  --sigap-ink: #c4501e;
+  --sigap-wash: #f6dccf;
+  --guyub: #1f6f5c;
+  --guyub-deep: #17594a;
+  --guyub-wash: #d8e6e0;
+  --ladang: #c9a227;
+  --ladang-wash: #f0e5c3;
+  --danger: #b42318;
+  --danger-wash: #f7dcd8;
+}
+
+@theme inline {
+  --color-paper: var(--paper);
+  --color-surface: var(--surface);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-ink-muted: var(--ink-muted);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-sigap: var(--sigap);
+  --color-sigap-ink: var(--sigap-ink);
+  --color-sigap-wash: var(--sigap-wash);
+  --color-guyub: var(--guyub);
+  --color-guyub-deep: var(--guyub-deep);
+  --color-guyub-wash: var(--guyub-wash);
+  --color-ladang: var(--ladang);
+  --color-ladang-wash: var(--ladang-wash);
+  --color-danger: var(--danger);
+  --color-danger-wash: var(--danger-wash);
+  --font-display: var(--font-poppins), system-ui, sans-serif;
+  --font-sans: var(--font-instrument), system-ui, sans-serif;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-instrument), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  font-size: 1rem;
+  line-height: 1.55;
+}
+
+::selection {
+  background: var(--sigap);
+  color: #fff;
+}
+
+:focus-visible {
+  outline: 2.5px solid var(--sigap-ink);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+@utility font-expanded {
+  font-family: var(--font-poppins), system-ui, sans-serif;
+}
+
+@layer components {
+  .h-display {
+    font-family: var(--font-poppins), system-ui, sans-serif;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 1.08;
+  }
+  .h-section {
+    font-family: var(--font-poppins), system-ui, sans-serif;
+    font-weight: 600;
+    letter-spacing: -0.015em;
+    line-height: 1.2;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border-radius: 999px;
+    padding: 0.7rem 1.25rem;
+    font-weight: 600;
+    font-size: 0.95rem;
+    line-height: 1.2;
+    transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+    white-space: nowrap;
+  }
+  .btn:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+  .btn-sm {
+    padding: 0.45rem 0.9rem;
+    font-size: 0.85rem;
+  }
+  .btn-primary {
+    background: var(--sigap-ink);
+    color: #fff;
+  }
+  .btn-primary:hover:not(:disabled) {
+    background: #a8421a;
+  }
+  .btn-ink {
+    background: var(--ink);
+    color: var(--paper);
+  }
+  .btn-ink:hover:not(:disabled) {
+    background: #2c3746;
+  }
+  .btn-guyub {
+    background: var(--guyub);
+    color: #fff;
+  }
+  .btn-guyub:hover:not(:disabled) {
+    background: var(--guyub-deep);
+  }
+  .btn-outline {
+    border: 1.5px solid var(--ink);
+    color: var(--ink);
+  }
+  .btn-outline:hover:not(:disabled) {
+    background: var(--ink);
+    color: var(--paper);
+  }
+  .btn-ghost {
+    color: var(--ink-soft);
+  }
+  .btn-ghost:hover:not(:disabled) {
+    background: color-mix(in oklab, var(--ink) 7%, transparent);
+    color: var(--ink);
+  }
+  .btn-danger {
+    border: 1.5px solid var(--danger);
+    color: var(--danger);
+  }
+  .btn-danger:hover:not(:disabled) {
+    background: var(--danger);
+    color: #fff;
+  }
+
+  .field {
+    width: 100%;
+    border: 1.5px solid var(--line);
+    background: var(--surface);
+    border-radius: 10px;
+    padding: 0.65rem 0.85rem;
+    font-size: 0.95rem;
+    color: var(--ink);
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+  .field::placeholder {
+    color: var(--ink-muted);
+  }
+  .field:hover {
+    border-color: var(--line-strong);
+  }
+  .field:focus {
+    outline: none;
+    border-color: var(--ink);
+    box-shadow: 0 0 0 3px color-mix(in oklab, var(--sigap) 25%, transparent);
+  }
+  .field[aria-invalid="true"] {
+    border-color: var(--danger);
+  }
+  select.field {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' fill='none' stroke='%2346505d' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M1 1.5l5 5 5-5'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.85rem center;
+    padding-right: 2.3rem;
+  }
+  .label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 600;
+    margin-bottom: 0.35rem;
+    color: var(--ink);
+  }
+  .hint {
+    font-size: 0.8rem;
+    color: var(--ink-muted);
+    margin-top: 0.3rem;
+  }
+
+  /* One card shape for the whole site: same radius and border everywhere so edges line up. */
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 1.5rem;
+  }
+
+  /* Selectable pill used for skills, days, categories. */
+  .choice {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    border: 1.5px solid var(--line);
+    background: var(--surface);
+    border-radius: 999px;
+    padding: 0.4rem 0.8rem;
+    font-size: 0.875rem;
+    cursor: pointer;
+    user-select: none;
+    transition: border-color 0.12s ease, background-color 0.12s ease;
+  }
+  .choice:hover {
+    border-color: var(--line-strong);
+  }
+  .choice:has(input:checked) {
+    border-color: var(--ink);
+    background: var(--ink);
+    color: var(--paper);
+  }
+  .choice:has(input:focus-visible) {
+    outline: 2.5px solid var(--sigap-ink);
+    outline-offset: 2px;
+  }
+  .choice input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .tab {
+    padding: 0.55rem 0.2rem;
+    font-weight: 600;
+    font-size: 0.92rem;
+    color: var(--ink-muted);
+    border-bottom: 2.5px solid transparent;
+  }
+  .tab[aria-current="page"] {
+    color: var(--ink);
+    border-color: var(--sigap);
+  }
+}
+
+/* Live feed on the homepage scrolls slowly like a dispatch board. */
+@keyframes feed-scroll {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(-50%);
+  }
+}
+.feed-window {
+  contain: paint;
+}
+.feed-track {
+  animation: feed-scroll 60s linear infinite;
+  will-change: transform;
+}
+.feed-window:hover .feed-track {
+  animation-play-state: paused;
+}
+
+/* Homepage sections stack like sheets: each one rises over the previous with rounded top corners. */
+.sheet {
+  position: relative;
+  margin-top: -2.75rem;
+  border-top-left-radius: 2.75rem;
+  border-top-right-radius: 2.75rem;
+  box-shadow: 0 -22px 40px -34px rgba(27, 36, 48, 0.45);
+}
+@media (min-width: 640px) {
+  .sheet {
+    border-top-left-radius: 3.5rem;
+    border-top-right-radius: 3.5rem;
+  }
+}
+/* Section heading row above a list of cards; the sidebar is pushed down by the same height so it lines up with the first card's top edge. */
+.section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  height: 2rem;
+  margin-bottom: 0.75rem;
+}
+@media (min-width: 1024px) {
+  .aside-offset {
+    margin-top: 2.75rem;
+  }
+}
+
+/* Gap between page content and the footer. The homepage's last sheet pulls the footer up over itself by cancelling this gap plus the sheet radius. */
+:root {
+  --footer-gap: 5rem;
+}
+.sheet-end {
+  margin-bottom: calc(-1 * (var(--footer-gap) + 2.75rem));
+}
+
+@keyframes notch-bounce {
+  0%,
+  100% {
+    transform: translateY(-2px);
+  }
+  50% {
+    transform: translateY(3px);
+  }
+}
+.notch-bounce {
+  animation: notch-bounce 1.8s ease-in-out infinite;
+}
+
+@keyframes hero-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+.hero-float {
+  animation: hero-float 6s ease-in-out infinite;
+  will-change: transform;
+}
+.hero-float-slow {
+  animation: hero-float 8s ease-in-out infinite;
+  will-change: transform;
+}
+
+@keyframes pulse-dot {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+.live-dot {
+  animation: pulse-dot 1.6s ease-in-out infinite;
+}
+
+@keyframes match-pop {
+  0% {
+    transform: scale(0.6);
+    opacity: 0;
+  }
+  70% {
+    transform: scale(1.08);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+.match-pop {
+  animation: match-pop 0.5s cubic-bezier(0.2, 0.8, 0.3, 1.2) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .feed-track {
+    animation: none;
+  }
+}
+
+/* Auth pages never scroll the page: tighten vertical rhythm on short viewports so the form fits. */
+@media (max-height: 760px) {
+  .auth-scope .field {
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+  }
+  .auth-scope .hint {
+    display: none;
+  }
+  .auth-scope .label {
+    margin-bottom: 0.2rem;
+  }
+  .auth-scope form {
+    margin-top: 0.9rem;
+  }
+}
+@media (max-height: 640px) {
+  .auth-scope h1 {
+    font-size: 1.4rem;
+  }
+}
+@media (max-height: 700px) {
+  .auth-scope .auth-role-body {
+    display: none;
+  }
+}
+
+/* Respect the system "reduce motion" setting: stop every decorative loop and smooth scroll. */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  .hero-float,
+  .hero-float-slow,
+  .live-dot,
+  .match-pop,
+  .feed-scroll {
+    animation: none !important;
+  }
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+  }
+}
