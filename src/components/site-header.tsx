@@ -15,7 +15,7 @@ export function SiteHeader() {
         <Link href="/" aria-label="Sigap — beranda" className="justify-self-start">
           <Logo />
         </Link>
-        <nav className="hidden items-center gap-1 text-sm font-medium text-ink-soft md:flex" aria-label="Utama">
+        <nav className="font-mono-ui hidden items-center gap-1 text-[0.72rem] text-ink-soft md:flex" aria-label="Utama">
           <Link href="/panggilan" className="rounded-full px-4 py-2 transition-colors hover:bg-ink/5 hover:text-ink">
             Jelajah panggilan
           </Link>
@@ -25,7 +25,7 @@ export function SiteHeader() {
           <Link href="/#penyelenggara" className="rounded-full px-4 py-2 transition-colors hover:bg-ink/5 hover:text-ink">
             Untuk penyelenggara
           </Link>
-          <Link href="/coba-ai" className="rounded-full bg-sigap-wash px-4 py-2 font-semibold text-sigap-ink transition-colors hover:bg-sigap-wash/70">
+          <Link href="/coba-ai" className="rounded-full bg-sigap-wash px-4 py-2 text-sigap-ink transition-colors hover:bg-sigap-wash/70">
             Coba AI
           </Link>
         </nav>

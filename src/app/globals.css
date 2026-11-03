@@ -71,6 +71,36 @@ body {
   font-family: var(--font-poppins), system-ui, sans-serif;
 }
 
+@utility font-jakarta {
+  font-family: var(--font-jakarta), system-ui, sans-serif;
+}
+
+@utility font-mono-ui {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+/* Hero marquee: the card row drifts left to right forever; the list is rendered twice so the loop is seamless. */
+.hero-marquee {
+  mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
+}
+.hero-marquee-track {
+  animation: hero-marquee 60s linear infinite;
+}
+.hero-marquee:hover .hero-marquee-track,
+.hero-marquee:focus-within .hero-marquee-track {
+  animation-play-state: paused;
+}
+@keyframes hero-marquee {
+  from { transform: translateX(-50%); }
+  to { transform: translateX(0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-marquee { overflow-x: auto; }
+  .hero-marquee-track { animation: none; }
+}
+
 @layer components {
   .h-display {
     font-family: var(--font-poppins), system-ui, sans-serif;
