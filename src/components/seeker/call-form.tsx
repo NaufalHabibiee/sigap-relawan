@@ -354,8 +354,20 @@ type SpeechRec = {
   onerror: ((e: { error: string }) => void) | null;
 };
 
-function AiDraftPanel({ onApply, verified }: { onApply: (d: CallDraft) => void; verified: boolean }) {
-  const [brief, setBrief] = useState("");
+export function AiDraftPanel({
+  onApply,
+  verified,
+  draft = draftCallWithAi,
+  maxLength = 800,
+  initial = "",
+}: {
+  onApply: (d: CallDraft) => void;
+  verified: boolean;
+  draft?: (text: string) => Promise<{ error?: string; draft?: CallDraft }>;
+  maxLength?: number;
+  initial?: string;
+}) {
+  const [brief, setBrief] = useState(initial);
   const [pending, start] = useTransition();
   const [result, setResult] = useState<CallDraft | null>(null);
   const [listening, setListening] = useState(false);
@@ -380,7 +392,7 @@ function AiDraftPanel({ onApply, verified }: { onApply: (d: CallDraft) => void; 
     rec.onresult = (e) => {
       let text = "";
       for (let i = 0; i < e.results.length; i++) text += e.results[i][0].transcript;
-      setBrief((base + text).slice(0, 800));
+      setBrief((base + text).slice(0, maxLength));
     };
     rec.onerror = (e) => {
       if (e.error === "not-allowed") toast.error("Izinkan akses mikrofon untuk memakai input suara.");
@@ -397,7 +409,7 @@ function AiDraftPanel({ onApply, verified }: { onApply: (d: CallDraft) => void; 
   function run(text = brief) {
     recRef.current?.stop();
     start(async () => {
-      const res = await draftCallWithAi(text);
+      const res = await draft(text);
       if (res.error || !res.draft) {
         toast.error(res.error ?? "Gagal membuat draf.");
         return;
@@ -420,7 +432,7 @@ function AiDraftPanel({ onApply, verified }: { onApply: (d: CallDraft) => void; 
         value={brief}
         onChange={(e) => setBrief(e.target.value)}
         rows={3}
-        maxLength={800}
+        maxLength={maxLength}
         className="field"
         aria-label="Kebutuhan relawan"
         placeholder="Contoh: Banjir di Kampung Pulo sejak tadi pagi, butuh 15 orang buat bantu dapur umum dan angkut logistik sampai Minggu"

@@ -25,6 +25,9 @@ export function SiteHeader() {
           <Link href="/#penyelenggara" className="rounded-full px-4 py-2 transition-colors hover:bg-ink/5 hover:text-ink">
             Untuk penyelenggara
           </Link>
+          <Link href="/coba-ai" className="rounded-full bg-sigap-wash px-4 py-2 font-semibold text-sigap-ink transition-colors hover:bg-sigap-wash/70">
+            Coba AI
+          </Link>
         </nav>
         <div className="flex items-center justify-self-end gap-2">
           <Link href="/panggilan" className="inline-flex size-9 items-center justify-center rounded-full hover:bg-ink/5 md:hidden" aria-label="Jelajah panggilan">

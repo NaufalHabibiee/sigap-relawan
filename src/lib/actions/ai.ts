@@ -1,5 +1,6 @@
 "use server";
 
+import { headers } from "next/headers";
 import { aiEnabled, askJson } from "../ai";
 import { getViewer } from "../auth";
 import { getOwnCall } from "../seeker-data";
@@ -40,7 +41,28 @@ const MEDIUM = /mengajar|ngajar|panitia|acara|bimbel|posyandu|kerja bakti/i;
 export async function draftCallWithAi(brief: string): Promise<{ error?: string; draft?: CallDraft }> {
   const viewer = await getViewer();
   if (!viewer || viewer.role !== "seeker") return { error: "Masuk sebagai penyelenggara dulu." };
-  const text = brief.trim().slice(0, 800);
+  return draftCore(brief.trim().slice(0, 800));
+}
+
+// Best-effort per-IP throttle for the public demo (per server instance).
+const demoHits = new Map<string, number[]>();
+
+/** Public demo on /coba-ai: same AI drafting without login, shorter input and a per-IP limit. */
+export async function demoDraftWithAi(brief: string): Promise<{ error?: string; draft?: CallDraft; category?: string }> {
+  const h = await headers();
+  const ip = h.get("x-forwarded-for")?.split(",")[0]?.trim() || "anon";
+  const now = Date.now();
+  const recent = (demoHits.get(ip) ?? []).filter((t) => now - t < 10 * 60_000);
+  if (recent.length >= 8) return { error: "Batas demo tercapai. Coba lagi 10 menit lagi." };
+  demoHits.set(ip, [...recent, now]);
+  const res = await draftCore(brief.trim().slice(0, 400));
+  if (!res.draft) return res;
+  const supabase = await createServerSupabase();
+  const { data } = res.draft.category_id ? await supabase.from("categories").select("name").eq("id", res.draft.category_id).maybeSingle() : { data: null };
+  return { ...res, category: (data as { name: string } | null)?.name };
+}
+
+async function draftCore(text: string): Promise<{ error?: string; draft?: CallDraft }> {
   if (text.length < 10) return { error: "Ceritakan kebutuhanmu minimal satu kalimat." };
 
   const supabase = await createServerSupabase();
