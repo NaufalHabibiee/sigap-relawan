@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { ArrowLeft, CalendarDays, Clock, Hourglass, MapPin, SearchX, Sparkles, UserPlus, Users } from "lucide-react";
 import { Tile, TileGrid } from "@/components/cards";
+import { AiRanking } from "@/components/seeker/ai-ranking";
 import { CallControls } from "@/components/seeker/call-controls";
 import { InviteButton } from "@/components/seeker/invite-button";
 import { QuickDecision } from "@/components/seeker/quick-decision";
@@ -109,6 +110,8 @@ async function Manage({ params, searchParams }: Pick<PageProps<"/p/panggilan/[id
           ) : matches.length === 0 ? (
             <EmptyState icon={SearchX} title="Belum ada relawan yang cocok" body="Coba longgarkan skill wajib, perluas lokasi ke online/hybrid, atau kurangi batasan usia." action={{ href: `/p/panggilan/${id}/ubah`, label: "Ubah kriteria" }} />
           ) : (
+            <>
+            <AiRanking callId={id} volunteers={matches.map((m) => ({ id: m.volunteer!.id, nickname: m.volunteer!.nickname }))} />
             <ul className="grid gap-4 md:grid-cols-2">
               {matches.map((m) => (
                 <li key={m.volunteer!.id} className="panel flex flex-col gap-4 p-6">
@@ -132,6 +135,7 @@ async function Manage({ params, searchParams }: Pick<PageProps<"/p/panggilan/[id
                 </li>
               ))}
             </ul>
+            </>
           ))}
 
         {tab === "pelamar" &&

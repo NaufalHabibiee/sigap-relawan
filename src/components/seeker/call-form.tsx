@@ -1,9 +1,10 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useMemo, useState, useTransition } from "react";
+import { useMemo, useRef, useState, useTransition } from "react";
 import { toast } from "sonner";
-import { Plus, Siren, Trash2 } from "lucide-react";
+import { Plus, Siren, Sparkles, Trash2 } from "lucide-react";
+import { draftCallWithAi, type CallDraft } from "@/lib/actions/ai";
 import { publishCall, saveCall } from "@/lib/actions/seeker";
 import { BENEFITS, LOADS } from "@/lib/constants";
 import { todayJakarta } from "@/lib/format";
@@ -22,6 +23,22 @@ export function CallForm({ master, call, verified, phoneVerified }: { master: Ma
   const today = todayJakarta();
   const provinces = useMemo(() => [...new Set(master.cities.map((c) => c.province))], [master.cities]);
   const isDraft = !call || call.status === "draf";
+  const formRef = useRef<HTMLFormElement>(null);
+
+  function applyDraft(d: CallDraft) {
+    const f = formRef.current;
+    if (!f) return;
+    const set = (name: string, value: string) => {
+      const el = f.elements.namedItem(name) as HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement | null;
+      if (el) el.value = value;
+    };
+    set("title", d.title);
+    set("description", d.description);
+    if (d.category_id) set("category_id", String(d.category_id));
+    set("quota", String(d.quota));
+    const lvl = LOADS.find((l) => l.value === d.load);
+    setLoad(lvl && lvl.level === 2 && !verified ? "sedang" : d.load);
+  }
 
   function submit(publish: boolean) {
     return (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -49,7 +66,8 @@ export function CallForm({ master, call, verified, phoneVerified }: { master: Ma
   }
 
   return (
-    <form className="space-y-6" onSubmit={(e) => e.preventDefault()} noValidate>
+    <form ref={formRef} className="space-y-6" onSubmit={(e) => e.preventDefault()} noValidate>
+      {isDraft && <AiDraftPanel onApply={applyDraft} verified={verified} />}
       <Section title="Kegiatan">
         <label className="block">
           <span className="label">Judul panggilan</span>
@@ -315,6 +333,69 @@ export function CallForm({ master, call, verified, phoneVerified }: { master: Ma
       </div>
       {isDraft && !phoneVerified && <p className="text-right text-sm text-sigap-ink">Verifikasi nomor HP di Profil organisasi untuk bisa mempublikasikan.</p>}
     </form>
+  );
+}
+
+const URGENCY_STYLE: Record<CallDraft["urgency"], string> = {
+  rendah: "bg-guyub-wash text-guyub-deep",
+  sedang: "bg-ladang-wash text-[#6b5410]",
+  tinggi: "bg-sigap-wash text-sigap-ink",
+  kritis: "bg-danger-wash text-danger",
+};
+
+function AiDraftPanel({ onApply, verified }: { onApply: (d: CallDraft) => void; verified: boolean }) {
+  const [brief, setBrief] = useState("");
+  const [pending, start] = useTransition();
+  const [result, setResult] = useState<CallDraft | null>(null);
+
+  function run() {
+    start(async () => {
+      const res = await draftCallWithAi(brief);
+      if (res.error || !res.draft) {
+        toast.error(res.error ?? "Gagal membuat draf.");
+        return;
+      }
+      setResult(res.draft);
+      onApply(res.draft);
+      toast.success("Form terisi. Periksa lagi sebelum dipublikasikan.");
+    });
+  }
+
+  return (
+    <section className="panel space-y-4 border-sigap p-5 sm:p-7">
+      <div>
+        <h2 className="h-section inline-flex items-center gap-2 text-lg">
+          <Sparkles className="size-5 text-sigap-ink" aria-hidden /> Isi cepat dengan AI
+        </h2>
+        <p className="text-sm text-ink-muted">Ceritakan kebutuhanmu dengan bahasa sehari-hari. AI menyusun judul, tugas, kategori, jumlah relawan, dan menilai tingkat urgensinya.</p>
+      </div>
+      <textarea
+        value={brief}
+        onChange={(e) => setBrief(e.target.value)}
+        rows={3}
+        maxLength={800}
+        className="field"
+        aria-label="Kebutuhan relawan"
+        placeholder="Contoh: Banjir di Kampung Pulo sejak tadi pagi, butuh 15 orang buat bantu dapur umum dan angkut logistik sampai Minggu"
+      />
+      <div className="flex flex-wrap items-center gap-3">
+        <button type="button" className="btn btn-primary btn-sm" disabled={pending || brief.trim().length < 10} onClick={run}>
+          <Sparkles className="size-4" aria-hidden /> {pending ? "AI sedang menyusun…" : "Susun dengan AI"}
+        </button>
+        {result && (
+          <span className={`rounded-full px-3 py-1 text-sm font-semibold ${URGENCY_STYLE[result.urgency]}`}>
+            Urgensi: {result.urgency}
+          </span>
+        )}
+      </div>
+      {result && (
+        <p className="text-sm text-ink-soft">
+          {result.urgency_reason}
+          {result.load === "darurat" && !verified && " Tingkat Darurat butuh verifikasi organisasi, jadi diset ke Sedang."}
+          {result.source === "aturan" && " (Mode cadangan: layanan AI sedang tidak tersedia.)"}
+        </p>
+      )}
+    </section>
   );
 }
 
