@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState, useTransition } from "react";
+import { useMemo, useRef, useState, useTransition } from "react";
 import { toast } from "sonner";
 import { ArrowLeft, ArrowRight, Briefcase, CalendarClock, Check, CircleCheck, ExternalLink, Plus, Sparkles, Trash2, Upload, UserRound } from "lucide-react";
+import { writeBioWithAi } from "@/lib/actions/ai";
 import { saveVolunteerStep } from "@/lib/actions/volunteer";
 import { LOADS, SLOTS, SOCIAL_PLATFORMS, WEEKDAYS } from "@/lib/constants";
 import { dateYearsAgo } from "@/lib/format";
@@ -253,6 +254,19 @@ function StepIdentity({ me, master }: { me: FullVolunteer; master: MasterData })
   }
 
   const [bioLen, setBioLen] = useState((me.bio ?? "").length);
+  const bioRef = useRef<HTMLTextAreaElement>(null);
+  const [bioPending, startBio] = useTransition();
+
+  function polishBio() {
+    const raw = bioRef.current?.value ?? "";
+    startBio(async () => {
+      const res = await writeBioWithAi(raw);
+      if (res.error || !res.bio) return void toast.error(res.error ?? "Gagal merapikan bio.");
+      if (bioRef.current) bioRef.current.value = res.bio;
+      setBioLen(res.bio.length);
+      toast.success(res.source === "ai" ? "Bio dirapikan AI. Periksa lagi sebelum menyimpan." : "Layanan AI sedang tidak tersedia, bio dirapikan seadanya.");
+    });
+  }
 
   return (
     <>
@@ -318,6 +332,7 @@ function StepIdentity({ me, master }: { me: FullVolunteer; master: MasterData })
         <label className="block">
           <span className="label">Bio singkat</span>
           <textarea
+            ref={bioRef}
             name="bio"
             rows={4}
             maxLength={300}
@@ -331,6 +346,12 @@ function StepIdentity({ me, master }: { me: FullVolunteer; master: MasterData })
             <span>{bioLen}/300</span>
           </span>
         </label>
+        <div className="flex flex-wrap items-center gap-3">
+          <button type="button" className="btn btn-outline btn-sm" disabled={bioPending || bioLen < 10} onClick={polishBio}>
+            <Sparkles className="size-4" aria-hidden /> {bioPending ? "AI sedang menulis…" : "Rapikan dengan AI"}
+          </button>
+          <span className="text-sm text-ink-muted">Tulis pengalamanmu seadanya, AI menyusunnya jadi bio yang menarik bagi penyelenggara.</span>
+        </div>
       </section>
     </>
   );

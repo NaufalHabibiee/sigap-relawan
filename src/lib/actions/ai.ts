@@ -117,7 +117,27 @@ Aturan:
   };
 }
 
-export type RankedVolunteer = { volunteer_id: string; fit: number; reason: string };
+/** Feature: volunteer writes rough notes, AI turns them into a profile bio (max 300 chars). */
+export async function writeBioWithAi(raw: string): Promise<{ error?: string; bio?: string; source?: "ai" | "aturan" }> {
+  const viewer = await getViewer();
+  if (!viewer || viewer.role !== "volunteer") return { error: "Masuk sebagai relawan dulu." };
+  const text = raw.trim().slice(0, 1000);
+  if (text.length < 10) return { error: "Tulis dulu pengalamanmu minimal satu kalimat." };
+
+  const ai = await askJson<{ bio: string }>(
+    `Rapikan catatan relawan berikut menjadi bio profil di platform relawan "Sigap".
+Catatan: """${text}"""
+
+Aturan: Bahasa Indonesia yang hangat dan lugas, sudut pandang orang pertama, maksimal 280 karakter, sebutkan pengalaman/keahlian konkret dan motivasi. Jangan menambah fakta yang tidak ada di catatan. Jangan menyertakan nomor HP, alamat, atau data pribadi.`,
+    { type: "OBJECT", properties: { bio: { type: "STRING" } }, required: ["bio"] },
+  );
+  if (ai?.bio) return { bio: ai.bio.trim().slice(0, 300), source: "ai" };
+
+  const tidy = text.replace(/\s+/g, " ").replace(/^./, (c) => c.toUpperCase());
+  return { bio: (/[.!?]$/.test(tidy) ? tidy : `${tidy}.`).slice(0, 300), source: "aturan" };
+}
+
+export type RankedVolunteer ={ volunteer_id: string; fit: number; reason: string };
 
 /** Feature: AI re-ranks the SQL matches for a call and explains each pick. */
 export async function rankMatchesWithAi(callId: string): Promise<{ error?: string; ranked?: RankedVolunteer[]; source?: "ai" | "aturan" }> {
