@@ -449,14 +449,14 @@ function AiDraftPanel({ onApply, verified }: { onApply: (d: CallDraft) => void; 
       {result && result.risk_flags.length > 0 && (
         <div role="alert" className="rounded-xl border-2 border-danger bg-danger-wash p-4 text-sm text-danger">
           <p className="inline-flex items-center gap-1.5 font-semibold">
-            <ShieldAlert className="size-4" aria-hidden /> Tanda risiko terdeteksi
+            <ShieldAlert className="size-4" aria-hidden /> Periksa sebelum dipublikasikan
           </p>
           <ul className="mt-1 list-disc pl-5">
             {result.risk_flags.map((f) => (
               <li key={f}>{f}</li>
             ))}
           </ul>
-          <p className="mt-1">Panggilan seperti ini bisa diturunkan admin. Hapus bagian yang berisiko sebelum dipublikasikan.</p>
+          <p className="mt-1">Lengkapi informasi keselamatan yang kurang. Panggilan yang meminta uang atau data pribadi relawan akan diturunkan admin.</p>
         </div>
       )}
     </section>
