@@ -50,23 +50,26 @@ async function Hero() {
     <section className="relative isolate overflow-hidden bg-paper">
       <div aria-hidden className="pointer-events-none absolute inset-0 -z-10">
         {/* Volunteers planting trees under open sky (BLM Utah, public domain): the sky is the calm area behind the headline, so no fade is needed. */}
-        <Image src="/hero/relawan-tanam-pohon.jpg" alt="" fill priority sizes="100vw" className="object-cover object-[50%_70%]" />
+        <div className="absolute inset-0 bg-[linear-gradient(180deg,#3f8fe2_0%,#4a9ceb_45%,#58aaf2_100%)]" />
+        <div className="absolute inset-x-0 bottom-0 h-[68%] [mask-image:linear-gradient(to_bottom,transparent,black_30%)]">
+          <Image src="/hero/relawan-tanam-pohon.jpg" alt="" fill priority sizes="100vw" className="object-cover object-[50%_30%]" />
+        </div>
       </div>
 
       <Container className="pt-24 pb-24 text-center sm:pt-28 lg:pb-28">
         <h1 className="h-display mx-auto max-w-4xl text-[2.6rem] text-ink sm:text-[3.6rem] lg:text-[4.2rem]">
           Ada yang butuh tanganmu
           <br />
-          <span className="text-sigap-ink">hari ini.</span>
+          <span className="text-white">hari ini.</span>
         </h1>
-        <p className="mx-auto mt-6 max-w-xl text-base leading-relaxed text-ink-soft sm:text-lg">
+        <p className="mx-auto mt-6 max-w-xl text-base leading-relaxed font-medium text-ink sm:text-lg">
           Isi profil sekali. Sigap mengabari saat ada panggilan relawan yang cocok, dari dapur umum banjir sampai kelas membaca di teras rumah.
         </p>
 
         <div className="mt-9 flex flex-wrap items-center justify-center gap-3">
           <Link
             href="/daftar?peran=penyelenggara"
-            className="font-mono-ui inline-flex h-12 items-center rounded-full bg-ink/10 px-6 text-[0.8rem] text-ink ring-1 ring-ink/15 backdrop-blur transition-colors hover:bg-ink/15"
+            className="font-mono-ui inline-flex h-12 items-center rounded-full bg-white/90 px-6 text-[0.8rem] text-ink ring-1 ring-white transition-colors hover:bg-white"
           >
             Butuh relawan
           </Link>
