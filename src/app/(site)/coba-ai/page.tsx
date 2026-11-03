@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { DemoAi } from "@/components/demo-ai";
+import { OfflineTriagePanel } from "@/components/offline-triage-panel";
 import { Container } from "@/components/ui";
 
 export const metadata: Metadata = {
@@ -19,6 +20,7 @@ export default function TryAiPage() {
         </p>
       </header>
       <DemoAi />
+      <OfflineTriagePanel />
     </Container>
   );
 }
