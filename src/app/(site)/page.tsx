@@ -56,7 +56,7 @@ async function Hero() {
       </div>
 
       <Container className="pt-24 pb-24 text-center sm:pt-28 lg:pb-28">
-        <h1 className="font-jakarta mx-auto max-w-4xl text-[2.6rem] leading-[1.08] font-light tracking-[-0.035em] text-ink sm:text-[3.6rem] lg:text-[4.2rem]">
+        <h1 className="h-display mx-auto max-w-4xl text-[2.6rem] text-ink sm:text-[3.6rem] lg:text-[4.2rem]">
           Ada yang butuh tanganmu
           <br />
           <span className="text-sigap-ink">hari ini.</span>

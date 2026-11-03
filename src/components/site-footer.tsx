@@ -41,9 +41,7 @@ export async function SiteFooter() {
   const stats = await getPlatformStats();
 
   return (
-    <footer className="relative z-10 overflow-hidden rounded-t-[2.75rem] bg-ink text-paper sm:rounded-t-[3.5rem]">
-      <div aria-hidden className="pointer-events-none absolute -top-40 left-1/4 size-[28rem] rounded-full bg-sigap/20 blur-3xl" />
-      <div aria-hidden className="pointer-events-none absolute -right-32 bottom-10 size-[24rem] rounded-full bg-guyub/25 blur-3xl" />
+    <footer className="relative z-10 overflow-hidden rounded-t-[2.75rem] bg-black text-paper sm:rounded-t-[3.5rem]">
 
       <div className="relative mx-auto w-full max-w-6xl px-4 pt-16 sm:px-6">
         {/* Closing call to action */}
