@@ -19,7 +19,6 @@ import {
   Star,
   Users,
 } from "lucide-react";
-import { CategoryCarousel } from "@/components/category-carousel";
 import { HeroArc } from "@/components/hero-arc";
 import { Avatar, Container } from "@/components/ui";
 import { formatDate, formatDateRange } from "@/lib/format";
@@ -388,22 +387,46 @@ async function Categories() {
   cacheLife("minutes");
   cacheTag("calls", "master");
   const [{ categories }, counts] = await Promise.all([getMasterData(), getCategoryCounts()]);
+  // Only fields that have open calls right now, busiest first: no empty "no calls yet" rows.
+  const open = categories
+    .map((c) => ({ slug: c.slug, name: c.name, count: counts[c.slug] ?? 0 }))
+    .filter((c) => c.count > 0)
+    .sort((x, y) => y.count - x.count);
+  if (open.length === 0) return null;
+  const half = Math.ceil(open.length / 2);
+  const columns = [open.slice(0, half), open.slice(half)];
+
   return (
     <section className="sheet z-[4] bg-paper">
-      <Container className="pt-20 pb-28 lg:pt-24 lg:pb-32">
-        <div>
-          <div className="mx-auto max-w-xl text-center">
-            <p className="inline-flex rounded-full bg-white px-3 py-1 text-sm font-semibold text-guyub-deep">Bidang</p>
-            <h2 className="h-section mt-4 text-3xl sm:text-4xl">Bidang yang bisa kamu bantu</h2>
-            <p className="mt-3 text-ink-soft">Dari tugas berat di lokasi bencana sampai pekerjaan ringan yang bisa dikerjakan dari rumah.</p>
+      <Container className="pt-20 pb-24 lg:pt-28 lg:pb-32">
+        <div className="grid gap-6 lg:grid-cols-[1fr_1.4fr] lg:items-end">
+          <div>
+            <p className="font-mono-ui text-[0.72rem] text-sigap-ink">Bidang</p>
+            <h2 className="font-jakarta mt-4 text-[2.2rem] leading-[1.1] font-light tracking-[-0.03em] text-ink sm:text-[2.8rem]">Bidang yang bisa kamu bantu.</h2>
           </div>
+          <p className="max-w-md text-ink-soft lg:justify-self-end">Dari tugas berat di lokasi bencana sampai pekerjaan ringan yang bisa dikerjakan dari rumah.</p>
         </div>
 
-        <div className="mt-10">
-          <CategoryCarousel items={categories.map((c) => ({ slug: c.slug, name: c.name, count: counts[c.slug] ?? 0 }))} />
+        <div className="mt-14 grid gap-x-12 border-t border-ink/15 md:grid-cols-2">
+          {columns.map((col, c) => (
+            <ul key={c}>
+              {col.map((cat) => (
+                <li key={cat.slug} className="border-b border-ink/15">
+                  <Link href={`/panggilan?kategori=${cat.slug}`} className="group flex items-center justify-between gap-6 py-5">
+                    <span className="text-[1.15rem] font-medium text-ink transition-colors group-hover:text-sigap-ink">{cat.name}</span>
+                    <span className="font-mono-ui flex items-center gap-3 text-[0.7rem] text-ink-muted">
+                      {cat.count} panggilan
+                      <ArrowRight className="size-4 text-ink transition-transform group-hover:translate-x-1" aria-hidden />
+                    </span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          ))}
         </div>
-        <div className="mt-8 text-center">
-          <Link href="/panggilan" className="btn btn-outline">
+
+        <div className="mt-12 text-center">
+          <Link href="/panggilan" className="font-mono-ui inline-flex h-11 items-center gap-2 rounded-full bg-ink px-6 text-[0.75rem] text-paper transition-colors hover:bg-ink/85">
             Jelajah semua panggilan <ArrowRight className="size-4" aria-hidden />
           </Link>
         </div>
