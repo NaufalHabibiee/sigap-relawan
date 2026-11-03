@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useMemo, useRef, useState, useTransition } from "react";
 import { toast } from "sonner";
-import { Plus, Siren, Sparkles, Trash2 } from "lucide-react";
+import { Mic, MicOff, Plus, ShieldAlert, Siren, Sparkles, Trash2 } from "lucide-react";
 import { draftCallWithAi, type CallDraft } from "@/lib/actions/ai";
 import { publishCall, saveCall } from "@/lib/actions/seeker";
 import { BENEFITS, LOADS } from "@/lib/constants";
@@ -343,14 +343,61 @@ const URGENCY_STYLE: Record<CallDraft["urgency"], string> = {
   kritis: "bg-danger-wash text-danger",
 };
 
+type SpeechRec = {
+  lang: string;
+  interimResults: boolean;
+  continuous: boolean;
+  start: () => void;
+  stop: () => void;
+  onresult: ((e: { results: ArrayLike<ArrayLike<{ transcript: string }> & { isFinal: boolean }> }) => void) | null;
+  onend: (() => void) | null;
+  onerror: ((e: { error: string }) => void) | null;
+};
+
 function AiDraftPanel({ onApply, verified }: { onApply: (d: CallDraft) => void; verified: boolean }) {
   const [brief, setBrief] = useState("");
   const [pending, start] = useTransition();
   const [result, setResult] = useState<CallDraft | null>(null);
+  const [listening, setListening] = useState(false);
+  const recRef = useRef<SpeechRec | null>(null);
 
-  function run() {
+  function toggleVoice() {
+    if (listening) {
+      recRef.current?.stop();
+      return;
+    }
+    const w = window as unknown as { SpeechRecognition?: new () => SpeechRec; webkitSpeechRecognition?: new () => SpeechRec };
+    const Ctor = w.SpeechRecognition ?? w.webkitSpeechRecognition;
+    if (!Ctor) {
+      toast.error("Browser ini belum mendukung input suara. Coba Chrome atau Edge.");
+      return;
+    }
+    const rec = new Ctor();
+    rec.lang = "id-ID";
+    rec.interimResults = true;
+    rec.continuous = true;
+    const base = brief.trim() ? `${brief.trim()} ` : "";
+    rec.onresult = (e) => {
+      let text = "";
+      for (let i = 0; i < e.results.length; i++) text += e.results[i][0].transcript;
+      setBrief((base + text).slice(0, 800));
+    };
+    rec.onerror = (e) => {
+      if (e.error === "not-allowed") toast.error("Izinkan akses mikrofon untuk memakai input suara.");
+    };
+    rec.onend = () => {
+      setListening(false);
+      recRef.current = null;
+    };
+    recRef.current = rec;
+    rec.start();
+    setListening(true);
+  }
+
+  function run(text = brief) {
+    recRef.current?.stop();
     start(async () => {
-      const res = await draftCallWithAi(brief);
+      const res = await draftCallWithAi(text);
       if (res.error || !res.draft) {
         toast.error(res.error ?? "Gagal membuat draf.");
         return;
@@ -367,7 +414,7 @@ function AiDraftPanel({ onApply, verified }: { onApply: (d: CallDraft) => void; 
         <h2 className="h-section inline-flex items-center gap-2 text-lg">
           <Sparkles className="size-5 text-sigap-ink" aria-hidden /> Isi cepat dengan AI
         </h2>
-        <p className="text-sm text-ink-muted">Ceritakan kebutuhanmu dengan bahasa sehari-hari. AI menyusun judul, tugas, kategori, jumlah relawan, dan menilai tingkat urgensinya.</p>
+        <p className="text-sm text-ink-muted">Ketik atau ucapkan kebutuhanmu dengan bahasa sehari-hari. AI menyusun judul, tugas, kategori, jumlah relawan, menilai urgensi, dan memeriksa tanda penipuan.</p>
       </div>
       <textarea
         value={brief}
@@ -379,9 +426,13 @@ function AiDraftPanel({ onApply, verified }: { onApply: (d: CallDraft) => void; 
         placeholder="Contoh: Banjir di Kampung Pulo sejak tadi pagi, butuh 15 orang buat bantu dapur umum dan angkut logistik sampai Minggu"
       />
       <div className="flex flex-wrap items-center gap-3">
-        <button type="button" className="btn btn-primary btn-sm" disabled={pending || brief.trim().length < 10} onClick={run}>
+        <button type="button" className={`btn btn-sm ${listening ? "btn-ink" : "btn-outline"}`} onClick={toggleVoice} aria-pressed={listening}>
+          {listening ? <MicOff className="size-4" aria-hidden /> : <Mic className="size-4" aria-hidden />} {listening ? "Berhenti merekam" : "Bicara"}
+        </button>
+        <button type="button" className="btn btn-primary btn-sm" disabled={pending || brief.trim().length < 10} onClick={() => run()}>
           <Sparkles className="size-4" aria-hidden /> {pending ? "AI sedang menyusun…" : "Susun dengan AI"}
         </button>
+        {listening && <span className="text-sm text-sigap-ink">Mendengarkan… (Bahasa Indonesia)</span>}
         {result && (
           <span className={`rounded-full px-3 py-1 text-sm font-semibold ${URGENCY_STYLE[result.urgency]}`}>
             Urgensi: {result.urgency}
@@ -394,6 +445,19 @@ function AiDraftPanel({ onApply, verified }: { onApply: (d: CallDraft) => void; 
           {result.load === "darurat" && !verified && " Tingkat Darurat butuh verifikasi organisasi, jadi diset ke Sedang."}
           {result.source === "aturan" && " (Mode cadangan: layanan AI sedang tidak tersedia.)"}
         </p>
+      )}
+      {result && result.risk_flags.length > 0 && (
+        <div role="alert" className="rounded-xl border-2 border-danger bg-danger-wash p-4 text-sm text-danger">
+          <p className="inline-flex items-center gap-1.5 font-semibold">
+            <ShieldAlert className="size-4" aria-hidden /> Tanda risiko terdeteksi
+          </p>
+          <ul className="mt-1 list-disc pl-5">
+            {result.risk_flags.map((f) => (
+              <li key={f}>{f}</li>
+            ))}
+          </ul>
+          <p className="mt-1">Panggilan seperti ini bisa diturunkan admin. Hapus bagian yang berisiko sebelum dipublikasikan.</p>
+        </div>
       )}
     </section>
   );

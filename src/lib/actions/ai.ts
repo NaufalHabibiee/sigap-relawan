@@ -15,8 +15,20 @@ export type CallDraft = {
   is_emergency: boolean;
   urgency: "rendah" | "sedang" | "tinggi" | "kritis";
   urgency_reason: string;
+  risk_flags: string[];
   source: "ai" | "aturan";
 };
+
+const SCAM = [
+  { re: /transfer|biaya pendaftaran|uang jaminan|deposit|bayar dulu|top ?up/i, msg: "Meminta relawan membayar atau mentransfer uang." },
+  { re: /nomor rekening|\bpin\b|\botp\b|kode verifikasi|password|kata sandi|foto ktp.*(wa|whatsapp)/i, msg: "Meminta data sensitif di luar platform." },
+  { re: /gaji (besar|tinggi|jutaan)|penghasilan pasti|kerja dari rumah dapat/i, msg: "Menjanjikan imbalan tidak wajar untuk kegiatan relawan." },
+  { re: /(hubungi|chat|dm) (via|lewat|ke) (wa|whatsapp|telegram)|wa\.me|t\.me/i, msg: "Mengarahkan komunikasi keluar dari platform." },
+];
+
+function ruleFlags(text: string): string[] {
+  return SCAM.filter((s) => s.re.test(text)).map((s) => s.msg);
+}
 
 const LOAD_VALUES: Load[] = ["ringan", "promosi", "sedang", "berat", "darurat"];
 
@@ -47,7 +59,8 @@ Aturan:
 - quota: perkiraan jumlah relawan (1-200).
 - urgency: rendah/sedang/tinggi/kritis berdasarkan risiko keselamatan dan waktu.
 - is_emergency: true hanya jika urgency kritis.
-- urgency_reason: satu kalimat alasan tingkat urgensi.`,
+- urgency_reason: satu kalimat alasan tingkat urgensi.
+- risk_flags: daftar tanda bahaya keselamatan/penipuan bagi relawan (meminta uang/transfer, data sensitif, imbalan tidak wajar, ajakan pindah ke kanal pribadi, kegiatan berbahaya tanpa pengaman). Kosongkan jika aman.`,
     {
       type: "OBJECT",
       properties: {
@@ -59,8 +72,9 @@ Aturan:
         urgency: { type: "STRING", enum: ["rendah", "sedang", "tinggi", "kritis"] },
         is_emergency: { type: "BOOLEAN" },
         urgency_reason: { type: "STRING" },
+        risk_flags: { type: "ARRAY", items: { type: "STRING" } },
       },
-      required: ["title", "description", "category", "load", "quota", "urgency", "is_emergency", "urgency_reason"],
+      required: ["title", "description", "category", "load", "quota", "urgency", "is_emergency", "urgency_reason", "risk_flags"],
     },
   );
 
@@ -76,6 +90,7 @@ Aturan:
         is_emergency: ai.is_emergency && ai.load === "darurat",
         urgency: ai.urgency,
         urgency_reason: ai.urgency_reason,
+        risk_flags: [...new Set([...(ai.risk_flags ?? []), ...ruleFlags(text)])].slice(0, 5),
         source: "ai",
       },
     };
@@ -96,6 +111,7 @@ Aturan:
       is_emergency: emergency,
       urgency: emergency ? "kritis" : load === "berat" ? "sedang" : "rendah",
       urgency_reason: emergency ? "Mengandung kata kunci bencana atau keselamatan jiwa." : "Tidak terdeteksi unsur darurat.",
+      risk_flags: ruleFlags(text),
       source: "aturan",
     },
   };
