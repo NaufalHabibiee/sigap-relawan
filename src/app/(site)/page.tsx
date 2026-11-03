@@ -448,8 +448,8 @@ async function Categories() {
 
           <div className="flex min-h-[13rem] flex-col rounded-3xl bg-white p-5 ring-1 ring-line">
             <p className="font-mono-ui text-[0.68rem] text-ink-muted">Bidang lain</p>
-            <ul className="mt-3 flex-1 space-y-0.5 overflow-hidden">
-              {rest.slice(0, 5).map((cat) => (
+            <ul className="mt-3 flex-1 space-y-1">
+              {rest.slice(0, 3).map((cat) => (
                 <li key={cat.slug}>
                   <Link href={`/panggilan?kategori=${cat.slug}`} className="flex items-center justify-between gap-3 py-1 text-[0.95rem] text-ink hover:text-sigap-ink">
                     <span className="truncate">{cat.name}</span>
@@ -459,7 +459,7 @@ async function Categories() {
               ))}
             </ul>
             <Link href="/panggilan" className="font-mono-ui mt-2 inline-flex items-center gap-2 text-[0.7rem] text-sigap-ink">
-              {rest.length > 5 ? `+${rest.length - 5} bidang · ` : ""}Semua panggilan <ArrowRight className="size-4" aria-hidden />
+              {rest.length > 3 ? `+${rest.length - 3} bidang lain` : "Semua panggilan"} <ArrowRight className="size-4" aria-hidden />
             </Link>
           </div>
         </div>
