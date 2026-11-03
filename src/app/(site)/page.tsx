@@ -20,6 +20,7 @@ import {
   Users,
 } from "lucide-react";
 import { HeroArc } from "@/components/hero-arc";
+import { HowItWorksSteps, type Step } from "@/components/how-it-works";
 import { Avatar, Container } from "@/components/ui";
 import { formatDate, formatDateRange } from "@/lib/format";
 import { getAcceptedCounts, getAnnouncements, getCategoryCounts, getEmergencyCalls, getFeed, getHeroPeople, getMasterData, getPlatformStats } from "@/lib/data";
@@ -346,37 +347,49 @@ function PathCard({
   );
 }
 
-const STEPS = [
-  { who: "Relawan", title: "Isi profil sekali", body: "Kemampuan, keterbatasan, waktu luang, dan lokasi. Cukup sekali, dipakai untuk semua panggilan." },
-  { who: "Penyelenggara", title: "Buat panggilan", body: "Ketik atau ucapkan kebutuhan. AI menyusun panggilan, menilai urgensi, dan memeriksa tanda penipuan." },
-  { who: "Sistem", title: "Dicocokkan", body: "Relawan yang memenuhi syarat dikabari. AI memilih yang paling sesuai, lengkap dengan alasannya." },
-  { who: "Keduanya", title: "Turun ke lapangan", body: "Koordinasi lewat chat, hadir di lokasi, lalu saling memberi ulasan setelah kegiatan." },
+const STEPS: Step[] = [
+  {
+    who: "Relawan",
+    title: "Isi profil sekali.",
+    body: "Kemampuan, keterbatasan, waktu luang, dan lokasi. Cukup sekali, dipakai untuk semua panggilan.",
+    shot: "/cara-kerja/01-profil.jpg",
+    alt: "Layar profil relawan Sigap dengan progres kelengkapan dan empat langkah pengisian",
+  },
+  {
+    who: "Penyelenggara",
+    title: "Ceritakan kebutuhanmu.",
+    body: "Ketik atau ucapkan dengan bahasa sehari-hari. AI menyusun panggilan, menilai urgensi, dan menandai risiko keselamatan atau penipuan.",
+    shot: "/cara-kerja/02-panggilan.jpg",
+    alt: "Layar Coba AI Sigap menilai urgensi kritis dan menandai risiko keselamatan",
+    ai: true,
+  },
+  {
+    who: "Sistem",
+    title: "Relawan yang tepat dikabari.",
+    body: "Syarat wajib disaring lebih dulu, lalu AI memilih relawan yang paling sesuai lengkap dengan alasannya.",
+    shot: "/cara-kerja/03-cocok.jpg",
+    alt: "Layar detail panggilan darurat Tim medis posko Semeru di Sigap",
+    ai: true,
+  },
+  {
+    who: "Keduanya",
+    title: "Turun ke lapangan.",
+    body: "Koordinasi lewat chat, hadir di lokasi, lalu saling memberi ulasan setelah kegiatan.",
+    shot: "/cara-kerja/04-lapangan.jpg",
+    alt: "Layar chat Sigap antara relawan dan penyelenggara setelah lamaran diterima",
+  },
 ];
 
 function HowItWorks() {
   return (
     <section id="cara-kerja" className="sheet z-[2] scroll-mt-20 bg-paper">
-      <Container className="pt-20 pb-24 lg:pt-28 lg:pb-32">
-        <div className="grid gap-6 lg:grid-cols-[1fr_1.4fr] lg:items-end">
-          <div>
-            <p className="font-mono-ui text-[0.72rem] text-sigap-ink">Cara kerja</p>
-            <h2 className="font-jakarta mt-4 text-[2.2rem] leading-[1.1] font-light tracking-[-0.03em] text-ink sm:text-[2.8rem]">Dari profil sampai turun ke lapangan.</h2>
-          </div>
-          <p className="max-w-md text-ink-soft lg:justify-self-end">Empat langkah, tanpa siaran acak di grup WhatsApp.</p>
+      <Container className="pt-20 pb-20 lg:pt-28 lg:pb-24">
+        <div className="max-w-2xl">
+          <p className="font-mono-ui text-[0.72rem] text-sigap-ink">Cara kerja</p>
+          <h2 className="h-display mt-4 text-[2.4rem] text-ink sm:text-[3rem]">Dari profil sampai turun ke lapangan.</h2>
+          <p className="mt-4 text-lg text-ink-soft">Empat langkah, tanpa siaran acak di grup WhatsApp.</p>
         </div>
-
-        <ol className="mt-14 grid border-t border-ink/15 sm:grid-cols-2 lg:grid-cols-4">
-          {STEPS.map((s, i) => (
-            <li key={s.title} className="border-b border-ink/15 py-8 sm:pr-8 lg:border-b-0 lg:border-l lg:px-8 lg:py-10 lg:first:border-l-0 lg:first:pl-0">
-              <p className="font-mono-ui flex items-baseline justify-between text-[0.7rem] text-ink-muted">
-                <span className="text-ink">{String(i + 1).padStart(2, "0")}</span>
-                {s.who}
-              </p>
-              <h3 className="font-jakarta mt-10 text-[1.45rem] leading-snug font-normal tracking-[-0.01em] text-ink">{s.title}</h3>
-              <p className="mt-3 text-[0.95rem] leading-relaxed text-ink-soft">{s.body}</p>
-            </li>
-          ))}
-        </ol>
+        <HowItWorksSteps steps={STEPS} />
       </Container>
     </section>
   );
@@ -414,7 +427,7 @@ async function Categories() {
         <div className="grid gap-6 lg:grid-cols-[1fr_1.4fr] lg:items-end">
           <div>
             <p className="font-mono-ui text-[0.72rem] text-sigap-ink">Bidang</p>
-            <h2 className="font-jakarta mt-4 text-[2.2rem] leading-[1.1] font-light tracking-[-0.03em] text-ink sm:text-[2.8rem]">Bidang yang bisa kamu bantu.</h2>
+            <h2 className="h-display mt-4 text-[2.4rem] text-ink sm:text-[3rem]">Bidang yang bisa kamu bantu.</h2>
           </div>
           <p className="max-w-md text-ink-soft lg:justify-self-end">Dari tugas berat di lokasi bencana sampai pekerjaan ringan yang bisa dikerjakan dari rumah.</p>
         </div>
@@ -506,7 +519,7 @@ function Faq() {
       <Container className="pt-20 pb-24 lg:pt-28 lg:pb-32">
         <div className="mx-auto max-w-2xl text-center">
           <p className="font-mono-ui text-[0.72rem] text-sigap-ink">FAQ</p>
-          <h2 className="font-jakarta mt-4 text-[2.2rem] leading-[1.1] font-light tracking-[-0.03em] text-ink sm:text-[2.8rem]">Pertanyaan yang sering muncul</h2>
+          <h2 className="h-display mt-4 text-[2.4rem] text-ink sm:text-[3rem]">Pertanyaan yang sering muncul</h2>
           <p className="mt-4 text-ink-soft">Belum menemukan jawabannya? Kami bantu lewat halaman Bantuan.</p>
         </div>
 
