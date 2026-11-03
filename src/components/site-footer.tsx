@@ -41,7 +41,9 @@ export async function SiteFooter() {
   const stats = await getPlatformStats();
 
   return (
-    <footer className="relative z-10 overflow-hidden rounded-t-[2.75rem] bg-black text-paper sm:rounded-t-[3.5rem]">
+    <footer className="relative z-10 overflow-hidden rounded-t-[2.75rem] bg-[linear-gradient(180deg,#3a2117_0%,#2a1811_55%,#1f120d_100%)] text-paper sm:rounded-t-[3.5rem]">
+      {/* Warm espresso tone from the Sigap orange family, with one soft ember glow behind the call to action. */}
+      <div aria-hidden className="pointer-events-none absolute -top-48 left-1/2 h-[26rem] w-[60rem] -translate-x-1/2 rounded-full bg-sigap/15 blur-3xl" />
 
       <div className="relative mx-auto w-full max-w-6xl px-4 pt-16 sm:px-6">
         {/* Closing call to action */}
