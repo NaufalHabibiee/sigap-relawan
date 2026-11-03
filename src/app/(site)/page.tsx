@@ -49,9 +49,8 @@ async function Hero() {
     <div className="relative z-10 -mt-16 bg-white">
     <section className="relative isolate overflow-hidden bg-paper">
       <div aria-hidden className="pointer-events-none absolute inset-0 -z-10">
-        {/* Real volunteer work as the backdrop (FEMA photo, public domain), washed in Sigap's paper tone so the headline stays readable. */}
-        <Image src="/hero/relawan-karung-pasir.jpg" alt="" fill priority sizes="100vw" className="object-cover object-[50%_30%]" />
-        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(238,236,229,0.97)_0%,rgba(238,236,229,0.94)_38%,rgba(238,236,229,0.6)_52%,rgba(238,236,229,0.12)_68%,rgba(27,36,48,0.05)_100%)]" />
+        {/* Volunteers planting trees under open sky (BLM Utah, public domain): the sky is the calm area behind the headline, so no fade is needed. */}
+        <Image src="/hero/relawan-tanam-pohon.jpg" alt="" fill priority sizes="100vw" className="object-cover object-[50%_70%]" />
       </div>
 
       <Container className="pt-24 pb-24 text-center sm:pt-28 lg:pb-28">
@@ -87,7 +86,7 @@ async function Hero() {
         </div>
 
         <p className="font-mono-ui mx-auto mt-8 w-fit rounded-full bg-paper/85 px-4 py-2 text-[0.7rem] text-ink/80 backdrop-blur">Gratis untuk relawan dan penyelenggara · tanpa biaya pendaftaran</p>
-        <p className="absolute right-4 bottom-3 rounded-md bg-ink/55 px-2 py-1 text-[0.62rem] text-paper/90 backdrop-blur">Foto: relawan mengisi karung pasir saat banjir · FEMA, domain publik</p>
+        <p className="absolute right-4 bottom-3 rounded-md bg-ink/55 px-2 py-1 text-[0.62rem] text-paper/90 backdrop-blur">Foto: relawan menanam pohon di tepi sungai · BLM Utah, domain publik</p>
       </Container>
     </section>
     </div>
@@ -386,15 +385,15 @@ async function Categories() {
   "use cache";
   cacheLife("minutes");
   cacheTag("calls", "master");
-  const [{ categories }, counts] = await Promise.all([getMasterData(), getCategoryCounts()]);
-  // Only fields that have open calls right now, busiest first: no empty "no calls yet" rows.
+  const [{ categories }, counts, feed] = await Promise.all([getMasterData(), getCategoryCounts(), getFeed()]);
+  // Only fields with open calls, busiest first. The top three get room and real call titles; the rest stay compact.
   const open = categories
     .map((c) => ({ slug: c.slug, name: c.name, count: counts[c.slug] ?? 0 }))
     .filter((c) => c.count > 0)
     .sort((x, y) => y.count - x.count);
   if (open.length === 0) return null;
-  const half = Math.ceil(open.length / 2);
-  const columns = [open.slice(0, half), open.slice(half)];
+  const featured = open.slice(0, 3);
+  const rest = open.slice(3);
 
   return (
     <section className="sheet z-[4] bg-paper">
@@ -407,29 +406,55 @@ async function Categories() {
           <p className="max-w-md text-ink-soft lg:justify-self-end">Dari tugas berat di lokasi bencana sampai pekerjaan ringan yang bisa dikerjakan dari rumah.</p>
         </div>
 
-        <div className="mt-14 grid gap-x-12 border-t border-ink/15 md:grid-cols-2">
-          {columns.map((col, c) => (
-            <ul key={c}>
-              {col.map((cat) => (
-                <li key={cat.slug} className="border-b border-ink/15">
-                  <Link href={`/panggilan?kategori=${cat.slug}`} className="group flex items-center justify-between gap-6 py-5">
-                    <span className="text-[1.15rem] font-medium text-ink transition-colors group-hover:text-sigap-ink">{cat.name}</span>
-                    <span className="font-mono-ui flex items-center gap-3 text-[0.7rem] text-ink-muted">
-                      {cat.count} panggilan
-                      <ArrowRight className="size-4 text-ink transition-transform group-hover:translate-x-1" aria-hidden />
-                    </span>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          ))}
+        <div className="mt-12 grid gap-4 md:grid-cols-3">
+          {featured.map((cat, i) => {
+            const examples = feed.filter((c) => c.category?.slug === cat.slug).slice(0, 2);
+            return (
+              <Link
+                key={cat.slug}
+                href={`/panggilan?kategori=${cat.slug}`}
+                className={`group flex min-h-[17rem] flex-col rounded-3xl p-6 transition-colors ${i === 0 ? "bg-ink text-paper hover:bg-ink/90" : "bg-white text-ink ring-1 ring-line hover:ring-ink/30"}`}
+              >
+                <p className={`font-mono-ui flex items-center justify-between text-[0.68rem] ${i === 0 ? "text-paper/60" : "text-ink-muted"}`}>
+                  <span>{String(i + 1).padStart(2, "0")}</span>
+                  <span>{cat.count} terbuka</span>
+                </p>
+                <h3 className="font-jakarta mt-8 text-[1.9rem] leading-tight font-normal tracking-[-0.02em]">{cat.name}</h3>
+                {examples.length > 0 && (
+                  <ul className={`mt-4 space-y-1.5 text-sm ${i === 0 ? "text-paper/70" : "text-ink-soft"}`}>
+                    {examples.map((e) => (
+                      <li key={e.id} className="truncate">
+                        {e.title}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+                <span className={`font-mono-ui mt-auto inline-flex items-center gap-2 pt-6 text-[0.7rem] ${i === 0 ? "text-sigap" : "text-sigap-ink"}`}>
+                  Lihat panggilan <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" aria-hidden />
+                </span>
+              </Link>
+            );
+          })}
         </div>
 
-        <div className="mt-12 text-center">
-          <Link href="/panggilan" className="font-mono-ui inline-flex h-11 items-center gap-2 rounded-full bg-ink px-6 text-[0.75rem] text-paper transition-colors hover:bg-ink/85">
-            Jelajah semua panggilan <ArrowRight className="size-4" aria-hidden />
-          </Link>
-        </div>
+        {rest.length > 0 && (
+          <div className="mt-8 flex flex-wrap items-center gap-2">
+            <span className="font-mono-ui mr-2 text-[0.68rem] text-ink-muted">Bidang lain</span>
+            {rest.map((cat) => (
+              <Link
+                key={cat.slug}
+                href={`/panggilan?kategori=${cat.slug}`}
+                className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-sm text-ink ring-1 ring-line transition-colors hover:ring-ink/30"
+              >
+                {cat.name}
+                <span className="font-mono-ui text-[0.68rem] text-ink-muted">{cat.count}</span>
+              </Link>
+            ))}
+            <Link href="/panggilan" className="font-mono-ui ml-auto inline-flex items-center gap-2 text-[0.72rem] text-ink hover:text-sigap-ink">
+              Semua panggilan <ArrowRight className="size-4" aria-hidden />
+            </Link>
+          </div>
+        )}
       </Container>
     </section>
   );
