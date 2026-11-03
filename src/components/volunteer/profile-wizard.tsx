@@ -93,7 +93,7 @@ export function ProfileWizard({
             {pct}%
           </span>
         </div>
-        <div className="min-w-0 flex-1">
+        <div className="min-w-[13rem] flex-1 basis-[13rem]">
           <div className="flex flex-wrap items-center gap-2">
             <h1 className="h-section text-2xl">{pct >= 100 ? "Profilmu sudah lengkap" : "Lengkapi profilmu"}</h1>
             <LevelBadge level={level} />
@@ -103,7 +103,7 @@ export function ProfileWizard({
           </p>
         </div>
         {me.slug && (
-          <Link href={`/relawan/${me.slug}`} className="btn btn-outline btn-sm">
+          <Link href={`/relawan/${me.slug}`} className="btn btn-outline btn-sm w-full sm:w-auto">
             Lihat profil publik <ExternalLink className="size-4" aria-hidden />
           </Link>
         )}
