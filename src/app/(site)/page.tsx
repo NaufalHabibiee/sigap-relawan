@@ -384,19 +384,31 @@ function HowItWorks() {
   );
 }
 
+/** Public-domain field photos for the bento tiles (Wikimedia Commons). */
+const FIELD_PHOTO: Record<string, string> = {
+  kebencanaan: "/bidang/kebencanaan.jpg",
+  pendidikan: "/bidang/pendidikan.jpg",
+  kesehatan: "/bidang/kesehatan.jpg",
+  lingkungan: "/bidang/lingkungan.jpg",
+};
+
 async function Categories() {
   "use cache";
   cacheLife("minutes");
   cacheTag("calls", "master");
-  const [{ categories }, counts, feed] = await Promise.all([getMasterData(), getCategoryCounts(), getFeed()]);
-  // Only fields with open calls, busiest first. The top three get room and real call titles; the rest stay compact.
+  const [{ categories }, counts] = await Promise.all([getMasterData(), getCategoryCounts()]);
+  // Fields with open calls, busiest first; on a tie, a field that has a photo goes first so the photo tiles stay filled.
   const open = categories
-    .map((c) => ({ slug: c.slug, name: c.name, count: counts[c.slug] ?? 0 }))
+    .map((c) => ({ slug: c.slug, name: c.name, count: counts[c.slug] ?? 0, photo: FIELD_PHOTO[c.slug] }))
     .filter((c) => c.count > 0)
-    .sort((x, y) => y.count - x.count);
+    .sort((x, y) => y.count - x.count || Number(Boolean(y.photo)) - Number(Boolean(x.photo)));
   if (open.length === 0) return null;
-  const featured = open.slice(0, 3);
-  const rest = open.slice(3);
+  const [big, wide, small, ...rest] = open;
+  const tiles = [
+    { cat: big, cls: "md:col-span-2 md:row-span-2 min-h-[22rem] md:min-h-0", size: "text-[2.4rem] sm:text-[2.8rem]" },
+    { cat: wide, cls: "md:col-span-2 min-h-[13rem]", size: "text-[1.8rem]" },
+    { cat: small, cls: "min-h-[13rem]", size: "text-[1.5rem]" },
+  ].filter((t) => t.cat);
 
   return (
     <section className="sheet z-[4] bg-paper">
@@ -409,55 +421,49 @@ async function Categories() {
           <p className="max-w-md text-ink-soft lg:justify-self-end">Dari tugas berat di lokasi bencana sampai pekerjaan ringan yang bisa dikerjakan dari rumah.</p>
         </div>
 
-        <div className="mt-12 grid gap-4 md:grid-cols-3">
-          {featured.map((cat, i) => {
-            const examples = feed.filter((c) => c.category?.slug === cat.slug).slice(0, 2);
-            return (
-              <Link
-                key={cat.slug}
-                href={`/panggilan?kategori=${cat.slug}`}
-                className={`group flex min-h-[17rem] flex-col rounded-3xl p-6 transition-colors ${i === 0 ? "bg-ink text-paper hover:bg-ink/90" : "bg-white text-ink ring-1 ring-line hover:ring-ink/30"}`}
-              >
-                <p className={`font-mono-ui flex items-center justify-between text-[0.68rem] ${i === 0 ? "text-paper/60" : "text-ink-muted"}`}>
-                  <span>{String(i + 1).padStart(2, "0")}</span>
-                  <span>{cat.count} terbuka</span>
-                </p>
-                <h3 className="font-jakarta mt-8 text-[1.9rem] leading-tight font-normal tracking-[-0.02em]">{cat.name}</h3>
-                {examples.length > 0 && (
-                  <ul className={`mt-4 space-y-1.5 text-sm ${i === 0 ? "text-paper/70" : "text-ink-soft"}`}>
-                    {examples.map((e) => (
-                      <li key={e.id} className="truncate">
-                        {e.title}
-                      </li>
-                    ))}
-                  </ul>
-                )}
-                <span className={`font-mono-ui mt-auto inline-flex items-center gap-2 pt-6 text-[0.7rem] ${i === 0 ? "text-sigap" : "text-sigap-ink"}`}>
-                  Lihat panggilan <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" aria-hidden />
-                </span>
-              </Link>
-            );
-          })}
-        </div>
+        <div className="mt-12 grid gap-4 md:auto-rows-[14rem] md:grid-cols-4">
+          {tiles.map(({ cat, cls, size }) => (
+            <Link
+              key={cat.slug}
+              href={`/panggilan?kategori=${cat.slug}`}
+              className={`group relative isolate flex flex-col justify-end overflow-hidden rounded-3xl p-6 text-white ${cls} ${cat.photo ? "bg-ink" : "bg-sigap-ink"}`}
+            >
+              {cat.photo && (
+                <Image
+                  src={cat.photo}
+                  alt=""
+                  fill
+                  sizes="(min-width: 768px) 50vw, 100vw"
+                  className="-z-10 object-cover transition-transform duration-700 group-hover:scale-[1.04]"
+                />
+              )}
+              <div aria-hidden className="absolute inset-0 -z-10 bg-[linear-gradient(180deg,rgba(0,0,0,0)_35%,rgba(0,0,0,0.72)_100%)]" />
+              <p className="font-mono-ui text-[0.68rem] text-white/80">{cat.count} panggilan terbuka</p>
+              <h3 className={`font-jakarta mt-1 leading-tight font-normal tracking-[-0.02em] ${size}`}>{cat.name}</h3>
+              <span className="absolute top-5 right-5 inline-flex size-10 items-center justify-center rounded-full bg-white/90 text-ink transition-transform group-hover:-rotate-45">
+                <ArrowRight className="size-4" aria-hidden />
+              </span>
+            </Link>
+          ))}
 
-        {rest.length > 0 && (
-          <div className="mt-8 flex flex-wrap items-center gap-2">
-            <span className="font-mono-ui mr-2 text-[0.68rem] text-ink-muted">Bidang lain</span>
-            {rest.map((cat) => (
-              <Link
-                key={cat.slug}
-                href={`/panggilan?kategori=${cat.slug}`}
-                className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-sm text-ink ring-1 ring-line transition-colors hover:ring-ink/30"
-              >
-                {cat.name}
-                <span className="font-mono-ui text-[0.68rem] text-ink-muted">{cat.count}</span>
-              </Link>
-            ))}
-            <Link href="/panggilan" className="font-mono-ui ml-auto inline-flex items-center gap-2 text-[0.72rem] text-ink hover:text-sigap-ink">
-              Semua panggilan <ArrowRight className="size-4" aria-hidden />
+          <div className="flex min-h-[13rem] flex-col rounded-3xl bg-white p-5 ring-1 ring-line">
+            <p className="font-mono-ui text-[0.68rem] text-ink-muted">Bidang lain</p>
+            <ul className="mt-3 flex-1 space-y-0.5 overflow-hidden">
+              {rest.slice(0, 5).map((cat) => (
+                <li key={cat.slug}>
+                  <Link href={`/panggilan?kategori=${cat.slug}`} className="flex items-center justify-between gap-3 py-1 text-[0.95rem] text-ink hover:text-sigap-ink">
+                    <span className="truncate">{cat.name}</span>
+                    <span className="font-mono-ui text-[0.68rem] text-ink-muted">{cat.count}</span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+            <Link href="/panggilan" className="font-mono-ui mt-2 inline-flex items-center gap-2 text-[0.7rem] text-sigap-ink">
+              {rest.length > 5 ? `+${rest.length - 5} bidang · ` : ""}Semua panggilan <ArrowRight className="size-4" aria-hidden />
             </Link>
           </div>
-        )}
+        </div>
+        <p className="mt-4 text-right text-[0.65rem] text-ink-muted">Foto: Wikimedia Commons (FEMA, DVIDS, U.S. Navy, dan lainnya), domain publik</p>
       </Container>
     </section>
   );
