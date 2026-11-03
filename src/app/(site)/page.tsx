@@ -49,27 +49,25 @@ async function Hero() {
     <div className="relative z-10 -mt-16 bg-white">
     <section className="relative isolate overflow-hidden bg-paper">
       <div aria-hidden className="pointer-events-none absolute inset-0 -z-10">
-        {/* Volunteers planting trees under open sky (BLM Utah, public domain): the sky is the calm area behind the headline, so no fade is needed. */}
-        <div className="absolute inset-0 bg-[linear-gradient(180deg,#3f8fe2_0%,#4a9ceb_45%,#58aaf2_100%)]" />
-        <div className="absolute inset-x-0 bottom-0 h-[68%] [mask-image:linear-gradient(to_bottom,transparent,black_30%)]">
-          <Image src="/hero/relawan-tanam-pohon.jpg" alt="" fill priority sizes="100vw" className="object-cover object-[50%_30%]" />
-        </div>
+        {/* Real volunteer work as the backdrop (FEMA photo, public domain), washed in Sigap's paper tone so the headline stays readable. */}
+        <Image src="/hero/relawan-karung-pasir.jpg" alt="" fill priority sizes="100vw" className="object-cover object-[50%_30%]" />
+        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(238,236,229,0.97)_0%,rgba(238,236,229,0.94)_38%,rgba(238,236,229,0.6)_52%,rgba(238,236,229,0.12)_68%,rgba(27,36,48,0.05)_100%)]" />
       </div>
 
       <Container className="pt-24 pb-24 text-center sm:pt-28 lg:pb-28">
         <h1 className="h-display mx-auto max-w-4xl text-[2.6rem] text-ink sm:text-[3.6rem] lg:text-[4.2rem]">
           Ada yang butuh tanganmu
           <br />
-          <span className="text-white">hari ini.</span>
+          <span className="text-sigap-ink">hari ini.</span>
         </h1>
-        <p className="mx-auto mt-6 max-w-xl text-base leading-relaxed font-medium text-ink sm:text-lg">
+        <p className="mx-auto mt-6 max-w-xl text-base leading-relaxed text-ink-soft sm:text-lg">
           Isi profil sekali. Sigap mengabari saat ada panggilan relawan yang cocok, dari dapur umum banjir sampai kelas membaca di teras rumah.
         </p>
 
         <div className="mt-9 flex flex-wrap items-center justify-center gap-3">
           <Link
             href="/daftar?peran=penyelenggara"
-            className="font-mono-ui inline-flex h-12 items-center rounded-full bg-white/90 px-6 text-[0.8rem] text-ink ring-1 ring-white transition-colors hover:bg-white"
+            className="font-mono-ui inline-flex h-12 items-center rounded-full bg-ink/10 px-6 text-[0.8rem] text-ink ring-1 ring-ink/15 backdrop-blur transition-colors hover:bg-ink/15"
           >
             Butuh relawan
           </Link>
@@ -89,7 +87,7 @@ async function Hero() {
         </div>
 
         <p className="font-mono-ui mx-auto mt-8 w-fit rounded-full bg-paper/85 px-4 py-2 text-[0.7rem] text-ink/80 backdrop-blur">Gratis untuk relawan dan penyelenggara · tanpa biaya pendaftaran</p>
-        <p className="absolute right-4 bottom-3 rounded-md bg-ink/55 px-2 py-1 text-[0.62rem] text-paper/90 backdrop-blur">Foto: relawan menanam pohon di tepi sungai · BLM Utah, domain publik</p>
+        <p className="absolute right-4 bottom-3 rounded-md bg-ink/55 px-2 py-1 text-[0.62rem] text-paper/90 backdrop-blur">Foto: relawan mengisi karung pasir saat banjir · FEMA, domain publik</p>
       </Container>
     </section>
     </div>
